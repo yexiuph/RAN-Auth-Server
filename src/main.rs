@@ -1,17 +1,19 @@
 mod utils;
+
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 use actix_web::middleware::Logger;
 use serde_json::json;
 use sqlx::mssql::{MssqlPoolOptions, MssqlPool};
-use crate::utils::ini::database_config;
+
+use crate::utils::ini::Config;
 
 pub struct AppState {
-    db: MssqlPool,
+    db_pool: MssqlPool,
 }
 
 impl AppState {
     async fn check_connection(&self) -> Result<(), sqlx::Error> {
-        let _ = self.db.acquire().await?;
+        let _ = self.db_pool.acquire().await?;
         Ok(())
     }
 }
@@ -22,9 +24,9 @@ async fn health_checker_handler() -> impl Responder {
 }
 
 #[get("/api/databasechecker")]
-async fn database_checker_handler(config: web::Data<AppState>) -> impl Responder {
-    match config.check_connection().await {
-        Ok(_) => HttpResponse::Ok().json(json!({"status": "success", "message": "Database connection is healthy."})),
+async fn database_checker_handler(database: web::Data<AppState>) -> impl Responder {
+    match database.check_connection().await {
+        Ok(_) => HttpResponse::Ok().json(json!({"status": "success", "message": "OK"})),
         Err(err) => {
             println!("{}", err);
             HttpResponse::InternalServerError().json(json!({"status": "error", "message": format!("Database connection failed: {}", err)}))
@@ -34,29 +36,22 @@ async fn database_checker_handler(config: web::Data<AppState>) -> impl Responder
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    let config = Config::load();
+    let database_url = config.database_url();
+
     if std::env::var_os("RUST_LOG").is_none() {
         std::env::set_var("RUST_LOG", "actix_web=info");
     }    
     env_logger::init();
     
-    let database_config = database_config();
-    let database_url = format!(
-        "sqlserver://{user}:{pass}@{host}:{port}/{db}",
-        user = database_config[0],
-        pass = database_config[1],
-        host = database_config[2],
-        port = database_config[3],
-        db = database_config[4]
-    );
-
-    let pool = match MssqlPoolOptions::new()
+    let db_pool = match MssqlPoolOptions::new()
         .max_connections(10)
         .connect(&database_url)
         .await
     {
-        Ok(pool) => {
+        Ok(db_pool) => {
             println!("✅Connection to the database is successful!");
-            pool
+            db_pool
         }
         Err(err) => {
             println!("🔥 Failed to connect to the database: {:?}", err);
@@ -68,12 +63,12 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
-            .app_data(web::Data::new(AppState { db: pool.clone() }))
+            .app_data(web::Data::new(AppState { db_pool: db_pool.clone() }))
             .service(health_checker_handler)
             .service(database_checker_handler)
             .wrap(Logger::default())
     })
-    .bind(("127.0.0.1", 2000))?
+    .bind(config.app_server())?
     .run()
     .await
 }

@@ -1,7 +1,9 @@
+mod utils;
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 use actix_web::middleware::Logger;
 use serde_json::json;
 use sqlx::mssql::{MssqlPoolOptions, MssqlPool};
+use crate::utils::ini::database_config;
 
 pub struct AppState {
     db: MssqlPool,
@@ -36,8 +38,17 @@ async fn main() -> std::io::Result<()> {
         std::env::set_var("RUST_LOG", "actix_web=info");
     }    
     env_logger::init();
+    
+    let database_config = database_config();
+    let database_url = format!(
+        "sqlserver://{user}:{pass}@{host}:{port}/{db}",
+        user = database_config[0],
+        pass = database_config[1],
+        host = database_config[2],
+        port = database_config[3],
+        db = database_config[4]
+    );
 
-    let database_url = "sqlserver://yxgames:yxgamesdev123@127.0.0.1:1433/RanUser";
     let pool = match MssqlPoolOptions::new()
         .max_connections(10)
         .connect(&database_url)

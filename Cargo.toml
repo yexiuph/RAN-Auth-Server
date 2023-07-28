@@ -1,0 +1,17 @@
+[package]
+name = "ran-auth"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+actix-cors = "0.6.4"
+actix-web = "4.3.1"
+chrono = { version = "0.4.26", features = ["serde"] }
+env_logger = "0.10.0"
+rust-ini = { version = "0.19.0", features = ["case-insensitive", "inline-comment"] }
+serde = { version = "1.0.177", features = ["derive"] }
+serde_json = "1.0.104"
+sqlx = { version = "0.6.3", features = ["mssql", "chrono", "runtime-async-std-native-tls", "uuid"] }
+uuid = { version = "1.4.1", features = ["serde", "v4"] }

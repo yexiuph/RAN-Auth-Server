@@ -3,12 +3,13 @@ mod utils;
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 use actix_web::middleware::Logger;
 use serde_json::json;
+use std::sync::Arc; // Import Arc
 use sqlx::mssql::{MssqlPoolOptions, MssqlPool};
 
 use crate::utils::ini::Config;
 
 pub struct AppState {
-    db_pool: MssqlPool,
+    db_pool: Arc<MssqlPool>,
 }
 
 impl AppState {
@@ -44,20 +45,7 @@ async fn main() -> std::io::Result<()> {
     }    
     env_logger::init();
     
-    let db_pool = match MssqlPoolOptions::new()
-        .max_connections(10)
-        .connect(&database_url)
-        .await
-    {
-        Ok(db_pool) => {
-            println!("✅Connection to the database is successful!");
-            db_pool
-        }
-        Err(err) => {
-            println!("🔥 Failed to connect to the database: {:?}", err);
-            std::process::exit(1);
-        }
-    };
+    let db_pool = connect_database(database_url).await;
 
     println!("🚀 Server started successfully");
 
@@ -71,4 +59,21 @@ async fn main() -> std::io::Result<()> {
     .bind(config.app_server())?
     .run()
     .await
+}
+
+async fn connect_database(db_url: String) -> Arc<MssqlPool> {
+    match MssqlPoolOptions::new()
+        .max_connections(10)
+        .connect(&db_url)
+        .await
+    {
+        Ok(db_pool) => {
+            println!("✅ Connection to the database is successful!");
+            Arc::new(db_pool)
+        }
+        Err(err) => {
+            println!("🔥 Failed to connect to the database: {:?}", err);
+            std::process::exit(1);
+        }
+    }
 }

@@ -8,6 +8,7 @@ pub struct Config {
     pub db_name: String,
     pub app_host: String,
     pub app_port: i32,
+    pub app_secret: String,
 }
 
 impl Config {
@@ -25,6 +26,7 @@ impl Config {
 
         let app_host = app_section.get("AuthHost").unwrap().to_string();
         let app_port = app_section.get("AuthPort").unwrap().parse::<i32>().unwrap();
+        let app_secret = app_section.get("AuthSecret").unwrap().to_string();
 
         Config {
             db_user,
@@ -34,7 +36,12 @@ impl Config {
             db_name,
             app_host,
             app_port,
+            app_secret,
         }
+    }
+
+    pub fn get_app_secret(&self) -> String {
+        format!("{}",self.app_secret)
     }
 
     pub fn app_server(&self) -> String {

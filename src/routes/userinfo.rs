@@ -3,7 +3,7 @@ use crate::{
     models::userinfo::{
         UserInfo, UserInfoResponse
     },
-    AppState
+    DatabaseState
 };
 use serde_json::json;
 

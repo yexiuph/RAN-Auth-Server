@@ -1,11 +1,11 @@
 use std::sync::Arc; // Import Arc
 use sqlx::mssql::{MssqlPoolOptions, MssqlPool};
 
-pub struct AppState {
+pub struct DatabaseState {
     pub db_pool: Arc<MssqlPool>,
 }
 
-impl AppState {
+impl DatabaseState {
     pub async fn check_connection(&self) -> Result<(), sqlx::Error> {
         let _ = self.db_pool.acquire().await?;
         Ok(())

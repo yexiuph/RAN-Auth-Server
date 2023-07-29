@@ -4,7 +4,7 @@ mod routes;
 mod models;
 
 use crate::utils::ini::Config;
-use crate::utils::database::{AppState, connect_database};
+use crate::utils::database::{DatabaseState, connect_database};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -24,7 +24,7 @@ async fn main() -> std::io::Result<()> {
 
     actix_web::HttpServer::new(move || {
         actix_web::App::new()
-            .app_data(actix_web::web::Data::new(AppState { db_pool: db_pool.clone() }))
+            .app_data(actix_web::web::Data::new(DatabaseState { db_pool: db_pool.clone() }))
             .configure(routes::core_route)
             .wrap(actix_web::middleware::Logger::default())
     })

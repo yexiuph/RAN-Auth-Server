@@ -1,4 +1,3 @@
-use crate::AppState;
 use serde_json::json;
 
 #[actix_web::get("/api/test")]

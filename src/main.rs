@@ -1,8 +1,7 @@
+#![allow(non_snake_case,dead_code,unused_imports,unused_variables)]
 mod utils;
 mod routes;
-
-use actix_web::{HttpServer, App, web};
-use actix_web::middleware::Logger;
+mod models;
 
 use crate::utils::ini::Config;
 use crate::utils::database::{AppState, connect_database};
@@ -23,11 +22,11 @@ async fn main() -> std::io::Result<()> {
 
     println!("🚀 Server started successfully");
 
-    HttpServer::new(move || {
-        App::new()
-            .app_data(web::Data::new(AppState { db_pool: db_pool.clone() }))
-            .configure(routes::core_route) // <-- This line adds the routes from the routes module
-            .wrap(Logger::default())
+    actix_web::HttpServer::new(move || {
+        actix_web::App::new()
+            .app_data(actix_web::web::Data::new(AppState { db_pool: db_pool.clone() }))
+            .configure(routes::core_route)
+            .wrap(actix_web::middleware::Logger::default())
     })
     .bind(config.app_server())?
     .run()

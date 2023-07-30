@@ -11,12 +11,14 @@ pub fn core_route(cfg: &mut web::ServiceConfig) {
         .service(
             web::scope("/api")
                 .guard(guard::Post())
-                .guard(guard::Header("YXGames", "CheckerAccess"))
+                .guard(guard::Header("YXGames", "BuyTheFullVersion"))
                 .configure(test::configure)
                 .configure(checks::configure)
         )
         .service(
             web::scope("/api/auth")
+                .guard(guard::Post())
+                .guard(guard::Header("YXGames", "BuyTheFullVersion"))
                 .configure(userinfo::configure)
         );
 }

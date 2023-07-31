@@ -9,6 +9,7 @@ pub struct Config {
     pub app_host: String,
     pub app_port: i32,
     pub app_secret: String,
+    pub app_version: String,
 }
 
 impl Config {
@@ -27,6 +28,7 @@ impl Config {
         let app_host = app_section.get("AuthHost").unwrap().to_string();
         let app_port = app_section.get("AuthPort").unwrap().parse::<i32>().unwrap();
         let app_secret = app_section.get("AuthSecret").unwrap().to_string();
+        let app_version = app_section.get("AuthVersion").unwrap().to_string();
 
         Config {
             db_user,
@@ -37,18 +39,23 @@ impl Config {
             app_host,
             app_port,
             app_secret,
+            app_version,
         }
     }
 
     pub fn get_app_secret(&self) -> String {
-        format!("{}",self.app_secret)
+        format!("{}", self.app_secret)
     }
 
-    pub fn app_server(&self) -> String {
+    pub fn get_app_version(&self) -> String {
+        format!("{}", self.app_version)
+    }
+
+    pub fn get_app_server(&self) -> String {
         format!("{}:{}", self.app_host, self.app_port)
     }
 
-    pub fn database_url(&self) -> String {
+    pub fn get_database_url(&self) -> String {
         format!(
             "sqlserver://{}:{}@{}:{}/{}",
             self.db_user, self.db_pass, self.db_host, self.db_port, self.db_name

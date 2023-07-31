@@ -26,11 +26,11 @@ pub async fn connect_database(db_url: String) -> Arc<MssqlPool> {
             .await
         {
             Ok(db_pool) => {
-                println!("✅ Connection to the database is successful!");
+                println!("🟢 Connection to the database is successful!");
                 return Arc::new(db_pool);
             }
             Err(err) => {
-                println!("🔥 Failed to connect to the database: {:?}", err);
+                println!("🔴 Failed to connect to the database: {:?}", err);
                 if retry_attempt < max_retries {
                     println!("Retrying in {} seconds...", retry_interval.num_seconds());
                     sleep(StdDuration::from_secs(retry_interval.num_seconds() as u64));

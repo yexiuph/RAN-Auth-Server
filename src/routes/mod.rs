@@ -18,7 +18,7 @@ pub fn core_route(cfg: &mut web::ServiceConfig) {
         .service(
             web::scope("/api/auth")
                 .guard(guard::Post())
-                .guard(guard::Header("YXGames", "BuyTheFullVersion"))
+                .guard(guard::Header("YXGames", "ThisIsTheHeaderForLogin"))
                 .configure(userinfo::configure)
         );
 }

@@ -7,7 +7,6 @@ use crate::{
 };
 use serde_json::{json, Value};
 use sqlx::{query, query_file, query_scalar, Row, Column,TypeInfo};
-use std::collections::HashMap;
 
 #[post("/login")]
 pub async fn verify_user_and_pass(

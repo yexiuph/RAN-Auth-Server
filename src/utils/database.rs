@@ -1,5 +1,8 @@
-use std::sync::Arc; // Import Arc
+use std::sync::Arc;
 use sqlx::mssql::{MssqlPoolOptions, MssqlPool};
+use chrono::Duration;
+use std::thread::sleep;
+use std::time::Duration as StdDuration;
 
 pub struct DatabaseState {
     pub db_pool: Arc<MssqlPool>,
@@ -13,18 +16,29 @@ impl DatabaseState {
 }
 
 pub async fn connect_database(db_url: String) -> Arc<MssqlPool> {
-    match MssqlPoolOptions::new()
-        .max_connections(10)
-        .connect(&db_url)
-        .await
-    {
-        Ok(db_pool) => {
-            println!("✅ Connection to the database is successful!");
-            Arc::new(db_pool)
-        }
-        Err(err) => {
-            println!("🔥 Failed to connect to the database: {:?}", err);
-            std::process::exit(1);
+    let max_retries = 5;
+    let retry_interval = Duration::seconds(5);
+
+    for retry_attempt in 1..=max_retries {
+        match MssqlPoolOptions::new()
+            .max_connections(10)
+            .connect(&db_url)
+            .await
+        {
+            Ok(db_pool) => {
+                println!("✅ Connection to the database is successful!");
+                return Arc::new(db_pool);
+            }
+            Err(err) => {
+                println!("🔥 Failed to connect to the database: {:?}", err);
+                if retry_attempt < max_retries {
+                    println!("Retrying in {} seconds...", retry_interval.num_seconds());
+                    sleep(StdDuration::from_secs(retry_interval.num_seconds() as u64));
+                }
+            }
         }
     }
+
+    println!("❌ Max retries reached. Unable to connect to the database after {} retries.", max_retries);
+    std::process::exit(1);
 }

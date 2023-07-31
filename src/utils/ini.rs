@@ -1,4 +1,9 @@
 use ini::Ini;
+use std::sync::Arc;
+
+pub struct ConfigState {
+    pub config: Arc<Config>,
+}
 
 pub struct Config {
     pub db_user: String,
@@ -10,6 +15,7 @@ pub struct Config {
     pub app_port: i32,
     pub app_secret: String,
     pub app_version: String,
+    pub app_login_secret: String,
 }
 
 impl Config {
@@ -29,7 +35,8 @@ impl Config {
         let app_port = app_section.get("AuthPort").unwrap().parse::<i32>().unwrap();
         let app_secret = app_section.get("AuthSecret").unwrap().to_string();
         let app_version = app_section.get("AuthVersion").unwrap().to_string();
-
+        let app_login_secret = app_section.get("AuthLoginSecret").unwrap().to_string();
+        
         Config {
             db_user,
             db_pass,
@@ -40,7 +47,12 @@ impl Config {
             app_port,
             app_secret,
             app_version,
+            app_login_secret,
         }
+    }
+
+    pub fn get_login_app_secret(&self) -> String {
+        format!("{}", self.app_login_secret)
     }
 
     pub fn get_app_secret(&self) -> String {

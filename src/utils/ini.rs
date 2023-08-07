@@ -5,6 +5,20 @@ pub struct ConfigState {
     pub config: Arc<Config>,
 }
 
+impl ConfigState {
+    pub fn new(config: Arc<Config>) -> Self {
+        ConfigState { config }
+    }
+
+    pub fn get_login_app_secret(&self) -> String {
+        format!("{}", self.config.app_login_secret)
+    }
+
+    pub fn get_app_secret(&self) -> String {
+        format!("{}", self.config.app_secret)
+    }
+}
+
 pub struct Config {
     pub db_user: String,
     pub db_pass: String,

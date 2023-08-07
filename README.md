@@ -1,2 +1,2 @@
-# Actix Web + MSSQL Connection Template
-### A simple template for MSSQL in RUST
+# RAN Online Authentication Server
+### A simple template for RAN Online Authentication Server

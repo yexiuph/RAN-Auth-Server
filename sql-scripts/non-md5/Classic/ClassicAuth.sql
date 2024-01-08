@@ -1,4 +1,13 @@
-CREATE PROCEDURE VerifyUserAndPassword (
+USE [RanUser]
+GO
+
+-- Drop the stored procedure if it already exists
+IF OBJECT_ID('[dbo].[ClassicAuth]', 'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[ClassicAuth]
+GO
+
+-- Create the stored procedure
+CREATE PROCEDURE [dbo].[ClassicAuth] (
     @UserID VARCHAR(20),
     @UserPass VARCHAR(20)
 )
@@ -10,9 +19,10 @@ BEGIN
     DECLARE @StoredPassword VARCHAR(20);
     DECLARE @UserAvailable INT;
     DECLARE @AuthenticationStatus BIT;
+    DECLARE @UserNum INT;
 
     -- Check if the user exists and is available
-    SELECT @UserName = UserName, @StoredPassword = UserPass, @UserAvailable = UserAvailable
+    SELECT @UserNum = UserNum, @UserName = UserID, @StoredPassword = UserPass, @UserAvailable = UserAvailable
     FROM UserInfo
     WHERE UserID = @UserID;
 
@@ -41,6 +51,7 @@ BEGIN
         SET @AuthenticationStatus = 0; -- Set to false (0) for failure
     END
 
-    -- Return the boolean result (1 for success, 0 for failure)
-    SELECT @AuthenticationStatus AS AuthStatus;
+    -- Return the result as a row
+    SELECT @AuthenticationStatus AS AuthenticationStatus, @UserNum AS UserNumber;
 END;
+GO

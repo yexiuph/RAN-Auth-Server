@@ -1,6 +1,6 @@
-use std::sync::Arc;
-use sqlx::mssql::{MssqlPoolOptions, MssqlPool};
 use chrono::Duration;
+use sqlx::mssql::{MssqlPool, MssqlPoolOptions};
+use std::sync::Arc;
 use std::thread::sleep;
 use std::time::Duration as StdDuration;
 
@@ -39,6 +39,9 @@ pub async fn connect_database(db_url: String) -> Arc<MssqlPool> {
         }
     }
 
-    println!("❌ Max retries reached. Unable to connect to the database after {} retries.", max_retries);
+    println!(
+        "❌ Max retries reached. Unable to connect to the database after {} retries.",
+        max_retries
+    );
     std::process::exit(1);
 }
